@@ -1,16 +1,11 @@
 #!/usr/bin/env bb
 
-(load-file "hash.clj")
+(require '[babashka.deps :as deps])
 
-(ns gen
-  (:require [clojure.java.io :as io]
-            [insilica.canonical-json :as json]))
+(deps/add-deps '{:deps {co.insilica/bb-srvc {:mvn/version "0.1.0"}}})
 
-(let [[_config-file outfile] *command-line-args*]
-  (with-open [writer (io/writer outfile)]
-    (doseq [i (range 1 11)]
-      (-> {:data {:i i}
-           :type "document"}
-          hash/add-hash
-          (json/write writer))
-        (.write writer "\n"))))
+(require '[srvc.bb :as sb])
+
+(sb/generate
+ (map (fn [i] {:data {:i i} :type "document"})
+      (range 1 11)))
