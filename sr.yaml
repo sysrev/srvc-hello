@@ -1,0 +1,46 @@
+db: "sink.jsonl"
+#db: "http://localhost:8090"
+
+reviewer: mailto:user@example.com
+
+labels:
+  - id: include
+    type: boolean
+    inclusion-values:
+      - true
+    question: Include?
+    required: true
+  - id: organ
+    type: categorical
+    categories:
+      - heart/cardiovascular
+      - blood/serum
+      - other
+    question: Which organ was the focus?
+    required: true
+
+flows:
+  simple:
+    steps:
+      - run: "gen/gen.clj"
+        config:
+          search_term: ocean bees
+
+      - run: "map/remove-reviewed.clj"
+      
+      - run: "map/map.clj"
+        labels:
+          - include
+          - organ
+
+  annotate: # would be nice to demo shiny-map.R here
+    steps:
+      - run: "gen/gen.clj"
+
+      - run: "map/remove-reviewed.clj"
+      
+      - run: "map/map.clj"
+        labels:
+          - include
+          - organ
+  
