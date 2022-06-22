@@ -73,14 +73,17 @@
 
 (sb/map
  (fn [{:keys [current_labels reviewer]}
-      {:keys [data hash type uri] :as event}]
+      {:keys [hash type uri] :as event
+       {:keys [abstract title]} :data}]
    (if-not (= "document" type)
      [event]
      (do
-       (when data
-         (json/write data *out*)
-         (println))
-       (some-> uri println)
+       (when (seq uri)
+         (println "URI:" uri))
+       (when (seq title)
+         (println "Title:" title))
+       (when (seq abstract)
+         (println abstract))
        (->> (read-answers current_labels)
             (map (fn [[label-hash answer]]
                    {:data {:answer answer

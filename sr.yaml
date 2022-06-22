@@ -4,20 +4,29 @@ db: "sink.jsonl"
 reviewer: mailto:user@example.com
 
 labels:
-  include:
+  acute_tox:
     type: boolean
-    inclusion_values:
-      - true
-    question: Include?
-    required: true
-  organ:
+    question: Acute toxicity?
+  eye_irrit:
+    type: boolean
+    question: Eye irritation?
+  substance:
     type: categorical
     categories:
-      - heart/cardiovascular
-      - blood/serum
-      - other
-    question: Which organ was the focus?
-    required: true
+      - sodium laureth sulfate
+      - sodium lauryl sulfoacetate
+      - sodium cocoyl glycinate
+      - disodium cocoyl glutamate
+      - decyl glucoside
+      - lauryl glucoside
+    inclusion_values:
+      - sodium laureth sulfate
+      - sodium lauryl sulfoacetate
+      - sodium cocoyl glycinate
+      - disodium cocoyl glutamate
+      - decyl glucoside
+      - lauryl glucoside
+    question: Substance
 
 flows:
   simple:
@@ -28,8 +37,9 @@ flows:
       
       - run: "map/map.clj"
         labels:
-          - include
-          - organ
+          - substance
+          - acute_tox
+          - eye_irrit
 
   annotate: # would be nice to demo shiny-map.R here
     steps:
@@ -38,7 +48,4 @@ flows:
       - run: "map/remove-reviewed.clj"
       
       - run: "map/map.clj"
-        labels:
-          - include
-          - organ
   
