@@ -47,5 +47,6 @@ flows:
 
       - run: "map/remove-reviewed.clj"
       
-      - run: "map/map.clj"
-  
+      - run: "map/shiny-map.R"
+        image: "insilica/biobricks:1.0"
+        #port: 3333  

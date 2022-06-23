@@ -1,7 +1,11 @@
 #!/usr/bin/env Rscript
 
-library(shiny)
+install.packages("recogito")
+install.packages("shiny")
+
+library(jsonlite)
 library(recogito)
+library(shiny)
 
 txt <- "Tell me, O muse, of that ingenious hero who travelled far and wide after he had sacked
 the famous town of Troy. Many cities did he visit, and many were the nations with whose manners and customs
@@ -49,11 +53,9 @@ server <- function(input, output) {
     }
   })
 }
-shinyApp(ui, server)
 
-# mkfifo test.fifo
-# echo "hi there" > test.fifo
-# cat test.fifo
+args <- commandArgs(trailingOnly = TRUE)
+config <- read_json(args[1])
+print(config$current_step$port)
 
-# mkfifo out.fifo
-# 
+shinyApp(ui, server, options=list("port"=config$current_step$port))
