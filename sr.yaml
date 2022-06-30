@@ -7,6 +7,9 @@ labels:
   acute_tox:
     type: boolean
     question: Acute toxicity?
+  annotation:
+    type: annotation
+    question: Annotation
   eye_irrit:
     type: boolean
     question: Eye irritation?
@@ -45,8 +48,10 @@ flows:
     steps:
       - run: "gen/gen.clj"
 
-      - run: "map/remove-reviewed.clj"
+      #- run: "map/remove-reviewed.clj"
       
       - run: "map/shiny-map.R"
         image: "insilica/biobricks:1.0"
         #port: 3333  
+        labels:
+          - annotation

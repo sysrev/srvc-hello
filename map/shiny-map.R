@@ -7,18 +7,49 @@ library(jsonlite)
 library(recogito)
 library(shiny)
 
-txt <- "Tell me, O muse, of that ingenious hero who travelled far and wide after he had sacked
-the famous town of Troy. Many cities did he visit, and many were the nations with whose manners and customs
-he was acquainted; moreover he suffered much by sea while trying to save his own life and bring his men safely
-home; but do what he might he could not save his men, for they perished through their own sheer folly in eating
-the cattle of the Sun-god Hyperion; so the god prevented them from ever reaching home. Tell me, too, about all
-these things, O daughter of Jove, from whatsoever source you may know them.\n
-So now all who escaped death in battle or by shipwreck had got safely home except Ulysses,
-and he, though he was longing to return to his wife and country, was detained by the goddess Calypso, who
-had got him into a large cave and wanted to marry him. But as years went by, there came a time when the gods
-settled that he should go back to Ithaca; even then, however, when he was among his own people, his troubles
-were not yet over; nevertheless all the gods had now begun to pity him except Neptune, who still persecuted
-him without ceasing and would not let him get home."
+args <- commandArgs(trailingOnly=TRUE)
+config <- read_json(args[1])
+in_file <- fifo(args[2], open="rt")
+out_file <- fifo(args[3], open="wt")
+label <- config$labels[[config$current_step$labels[[1]]]]
+
+getDoc <- function () {
+  line <- character(0)
+  # Read lines until a document is found
+  # Write each line to out_file
+  while ( TRUE ) {
+    # We have to use a non-blocking connection to get correct behavior with
+    # partial line reads, but we still need to wait for a full line.
+    while ( length(line) == 0 ) {
+      line <- readLines(in_file, n=1)
+    }
+    writeLines(line, con=out_file)
+    flush(out_file)
+    event <- parse_json(line)
+
+    if ( event$type == "document" ) {
+      return(event)
+    }
+  }
+}
+
+docText <- function(doc) {
+  doc$data$abstract
+}
+
+writeLabelAnswer <- function(input, doc) {
+  annotations <- read_recogito(input$annotations)
+  data <- list(
+    answer=annotations,
+    document=unbox(doc$hash),
+    label=unbox(label$hash),
+    reviewer=unbox(config$reviewer),
+    timestamp=unbox(floor(unclass(Sys.time())))
+  )
+  answer <- list(data=data,type=unbox("label-answer"))
+  writeLines(toJSON(answer), con=out_file)
+  flush(out_file)
+}
 
 tagset    <- c("LOCATION", "TIME", "PERSON")
 tagstyles <- "
@@ -37,25 +68,20 @@ ui <- fluidPage(tags$head(tags$style(HTML(tagstyles))),
                 recogitoOutput(outputId = "annotation_text"),
                 tags$hr(),
                 tags$h3("Results"),
-                verbatimTextOutput(outputId = "annotation_result"))
+                verbatimTextOutput(outputId = "annotation_result"),
+                actionButton("submit", "Submit"))
 
 server <- function(input, output) {
+  state <- reactiveValues(doc=getDoc())
   
   output$annotation_text <- renderRecogito({
-    recogito("annotations", text = txt, tags = tagset)
+    recogito("annotations", text = docText(state$doc), tags = tagset)
   })
 
-  output$annotation_result <- renderPrint({
-    if(length(input$annotations) > 0){
-      x <- read_recogito(input$annotations)
-      write.csv(x,"tmp.csv")
-      x
-    }
+  observeEvent(input$submit, {
+    writeLabelAnswer(input, state$doc)
+    state$doc <- getDoc()
   })
 }
-
-args <- commandArgs(trailingOnly = TRUE)
-config <- read_json(args[1])
-print(config$current_step$port)
 
 shinyApp(ui, server, options=list("port"=config$current_step$port))
