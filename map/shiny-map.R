@@ -10,7 +10,7 @@ library(shiny)
 args <- commandArgs(trailingOnly=TRUE)
 config <- read_json(args[1])
 in_file <- fifo(args[2], open="rt")
-out_file <- fifo(args[3], open="wt")
+out_file <- fifo(args[3], open="wt", blocking=TRUE)
 label <- config$labels[[config$current_step$labels[[1]]]]
 
 getDoc <- function () {
