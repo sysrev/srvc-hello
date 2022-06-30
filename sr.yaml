@@ -55,3 +55,14 @@ flows:
         #port: 3333  
         labels:
           - annotation
+
+  jupyter:
+    steps:
+      - run: "gen/gen.clj"
+
+      - run: "map/remove-reviewed.clj"
+
+      - run: "map/jupyter.clj"
+        labels:
+          - acute_tox
+          - eye_irrit
