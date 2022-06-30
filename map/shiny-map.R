@@ -7,10 +7,9 @@ library(jsonlite)
 library(recogito)
 library(shiny)
 
-args <- commandArgs(trailingOnly=TRUE)
-config <- read_json(args[1])
-in_file <- fifo(args[2], open="rt")
-out_file <- fifo(args[3], open="wt", blocking=TRUE)
+config <- read_json(Sys.getenv("SR_CONFIG"))
+in_file <- fifo(Sys.getenv("SR_INPUT"), open="rt")
+out_file <- fifo(Sys.getenv("SR_OUTPUT"), open="wt", blocking=TRUE)
 label <- config$labels[[config$current_step$labels[[1]]]]
 
 getDoc <- function () {
