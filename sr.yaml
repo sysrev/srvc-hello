@@ -48,7 +48,7 @@ flows:
     steps:
       - run: "gen/gen.clj"
 
-      #- run: "map/remove-reviewed.clj"
+      - run: "map/remove-reviewed.clj"
       
       - run: "map/shiny-map.R"
         image: "insilica/biobricks:1.0"
