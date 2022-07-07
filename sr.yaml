@@ -66,3 +66,11 @@ flows:
         labels:
           - acute_tox
           - eye_irrit
+
+  spacy:
+    steps:
+      - run: "gen/gen.clj"
+
+      - run: "map/spacy-ner.py"
+        labels:
+          - annotation
