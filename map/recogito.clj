@@ -8,15 +8,10 @@
 
 (import '[java.net URLDecoder])
 
-(deps/add-deps '{:deps {co.insilica/bb-srvc {:mvn/version "0.5.0"}}})
+(deps/add-deps '{:deps {co.insilica/bb-srvc {:mvn/version "0.6.0"}}})
 
 (require '[insilica.canonical-json :as json]
          '[srvc.bb :as sb])
-
-(def config
-  (-> (System/getenv "SR_CONFIG")
-      slurp
-      (json/read-str :key-fn keyword)))
 
 (def resource-path
   (-> *file*
@@ -32,24 +27,44 @@
               str
               io/file)})
 
-(defn handler [{:keys [uri]}]
-  (cond
-    (= "/" uri)
-    (resource-file "public/recogito.html")
+(defn handler [current-doc]
+ (fn [{:keys [uri]}]
+   (cond
+     (= "/" uri)
+     (resource-file "public/recogito.html")
 
-    (str/starts-with? uri "/public/")
-    (resource-file (subs uri 1))
+     (= "/current-doc" uri)
+     {:status 200
+      :headers {"Content-Type" "application/json"}
+      :body (json/write-str @current-doc)}
 
-    :else
-    {:status 404 :body "Not Found"}))
+     (str/starts-with? uri "/public/")
+     (resource-file (subs uri 1))
 
-(def server
-  (server/run-server
-   handler
-   {:ip "127.0.0.1"
-    :legacy-return-value? false
-    :port (:port config 0)}))
+     :else
+     {:status 404 :body "Not Found"})))
 
-(println (str "Listening on http://127.0.0.1:" (server/server-port server)))
-
-(Thread/sleep (Long/MAX_VALUE))
+(let [config-file (System/getenv "SR_CONFIG")
+      in-file (System/getenv "SR_INPUT")
+      out-file (System/getenv "SR_OUTPUT")
+      config (sb/get-config config-file)]
+  (with-open [writer (io/writer out-file)]
+    (let [lines (-> in-file io/reader line-seq atom)
+          next-doc! (fn []
+                      (when-let [line (first @lines)]
+                        (.write writer line)
+                        (.write writer "\n")
+                        (.flush writer)
+                        (swap! lines rest)
+                        (let [{:keys [type] :as event} (json/read-str line :key-fn keyword)]
+                          (if (= "document" type)
+                            event
+                            (recur)))))
+          current-doc (atom (next-doc!))
+          server (server/run-server
+                  (handler current-doc)
+                  {:ip "127.0.0.1"
+                   :legacy-return-value? false
+                   :port (:port config 0)})]
+      (println (str "Listening on http://127.0.0.1:" (server/server-port server)))
+      (Thread/sleep Long/MAX_VALUE))))

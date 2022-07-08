@@ -4,12 +4,34 @@
 <script src="public/recogito-js-1.7.1/recogito.min.js"></script>
 </head>
 <body>
-<div id="recogito">text</div>
+<div id="recogito"></div>
+<hr>
+<div>
+  <button id="recogito-submit" type="submit">Submit</button>
+</div>
 <script type="text/javascript">
     (function() {
+      var el = document.getElementById('recogito')
+      var submit = document.getElementById('recogito-submit')
+
       var r = Recogito.init({
-        content: document.getElementById('recogito')
-      });
+        content: el
+      })
+
+      var loadCurrentDoc = function () {
+        var req = new XMLHttpRequest()
+        req.addEventListener("load", function (resp) {
+          r.clearAnnotations()
+          doc = JSON.parse(req.response)
+          el.innerText = doc['data']['abstract']
+        })
+        req.open("GET", "/current-doc")
+        req.send()
+      }
+
+      submit.addEventListener("click", loadCurrentDoc)
+
+      loadCurrentDoc()
     })();
   </script>
 </body>
