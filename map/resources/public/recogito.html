@@ -27,6 +27,10 @@ h1 {
 </style>
 </head>
 <body>
+<div>
+  <button id="toggle-mode">Mode: Annotation</button>
+</div>
+<hr>
 <div id="outer-container">
   <div id="recogito"></div>
 </div>
@@ -39,10 +43,19 @@ h1 {
       var config = null
       var currentDoc = null
       var el = document.getElementById('recogito')
+      var mode = "ANNOTATION"
       var submit = document.getElementById('recogito-submit')
+      var toggle = document.getElementById('toggle-mode')
 
       var r = Recogito.init({
         content: el
+      })
+
+      toggle.addEventListener("click", function() {
+        mode = (mode == "ANNOTATION") ? "RELATIONS" : "ANNOTATION"
+        r.setMode(mode)
+        text = (mode == "ANNOTATION") ? "Annotation" : "Relations"
+        toggle.innerText = "Mode: " + text
       })
 
       var loadConfig = function () {
