@@ -11,6 +11,8 @@
 </div>
 <script type="text/javascript">
     (function() {
+      var config = null
+      var currentDoc = null
       var el = document.getElementById('recogito')
       var submit = document.getElementById('recogito-submit')
 
@@ -18,19 +20,44 @@
         content: el
       })
 
+      var loadConfig = function () {
+        var req = new XMLHttpRequest()
+        req.addEventListener("load", function (resp) {
+          config = JSON.parse(req.response)
+        })
+        req.open("GET", "/config")
+        req.send()
+      }
+
       var loadCurrentDoc = function () {
         var req = new XMLHttpRequest()
         req.addEventListener("load", function (resp) {
           r.clearAnnotations()
-          doc = JSON.parse(req.response)
-          el.innerText = doc['data']['abstract']
+          currentDoc = JSON.parse(req.response)
+          el.innerText = currentDoc['data']['abstract']
         })
         req.open("GET", "/current-doc")
         req.send()
       }
 
-      submit.addEventListener("click", loadCurrentDoc)
+      var submitDoc = function() {
+        var req = new XMLHttpRequest()
+        req.addEventListener("load", function (resp) {
+          loadCurrentDoc()
+        })
+        req.open("POST", "/submit-label-answers")
+        var answer = {"data": {"answer": r.getAnnotations(),
+                               "document": currentDoc.hash,
+                               "label": config.current_labels[0].hash,
+                               "reviewer": config.reviewer,
+                               "timestamp": Math.floor(Date.now() / 1000)},
+                      "type": "label-answer"}
+        req.send(JSON.stringify([answer]))
+      }
 
+      submit.addEventListener("click", submitDoc)
+
+      loadConfig()
       loadCurrentDoc()
     })();
   </script>

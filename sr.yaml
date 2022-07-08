@@ -51,6 +51,8 @@ flows:
       - run: "map/remove-reviewed.clj"
       
       - run: "map/recogito.clj"
+        labels:
+          - annotation
 
   jupyter:
     steps:

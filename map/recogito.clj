@@ -11,7 +11,8 @@
 (deps/add-deps '{:deps {co.insilica/bb-srvc {:mvn/version "0.6.0"}}})
 
 (require '[insilica.canonical-json :as json]
-         '[srvc.bb :as sb])
+         '[srvc.bb :as sb]
+         '[srvc.bb.json-schema :as bjs])
 
 (def resource-path
   (-> *file*
@@ -27,16 +28,38 @@
               str
               io/file)})
 
-(defn handler [current-doc]
- (fn [{:keys [uri]}]
+(defn json-response [json]
+  {:status 200
+   :headers {"Content-Type" "application/json"}
+   :body (json/write-str json)})
+
+(defn submit-answers [{:keys [body]} {:keys [current-doc next-doc! writer]}]
+  (doseq [answer (-> body io/reader json/read)]
+    (let [{:keys [errors valid?]} (-> (assoc answer :hash "")
+                                      json/write-str json/read-str
+                                      bjs/validate)]
+      (if valid?
+        (sb/write-event writer answer)
+        (throw (ex-info "Event failed validation"
+                        {:errors errors :event answer})))))
+  (reset! current-doc (next-doc!))
+  (json-response {:success true}))
+
+(defn handler [{:keys [config current-doc] :as opts}]
+ (fn [{:keys [request-method uri] :as request}]
    (cond
      (= "/" uri)
      (resource-file "public/recogito.html")
 
+     (= "/config" uri)
+     (json-response config)
+
      (= "/current-doc" uri)
-     {:status 200
-      :headers {"Content-Type" "application/json"}
-      :body (json/write-str @current-doc)}
+     (json-response @current-doc)
+
+     (and (= :post request-method)
+          (= "/submit-label-answers" uri))
+     (submit-answers request opts)
 
      (str/starts-with? uri "/public/")
      (resource-file (subs uri 1))
@@ -62,7 +85,10 @@
                             (recur)))))
           current-doc (atom (next-doc!))
           server (server/run-server
-                  (handler current-doc)
+                  (handler {:config config
+                            :current-doc current-doc
+                            :next-doc! next-doc!
+                            :writer writer})
                   {:ip "127.0.0.1"
                    :legacy-return-value? false
                    :port (:port config 0)})]
