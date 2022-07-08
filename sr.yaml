@@ -44,17 +44,13 @@ flows:
           - acute_tox
           - eye_irrit
 
-  annotate: # would be nice to demo shiny-map.R here
+  annotate:
     steps:
       - run: "gen/gen.clj"
 
       - run: "map/remove-reviewed.clj"
       
-      - run: "map/shiny-map.R"
-        image: "insilica/biobricks:1.0"
-        #port: 3333  
-        labels:
-          - annotation
+      - run: "map/recogito.clj"
 
   jupyter:
     steps:
