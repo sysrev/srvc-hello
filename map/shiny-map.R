@@ -1,11 +1,7 @@
 #!/usr/bin/env Rscript
-
-install.packages("recogito")
-install.packages("shiny")
-
-library(jsonlite)
-library(recogito)
-library(shiny)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load_gh("sysrev/srrecogito")
+pacman::p_load(shiny, jsonlite, srrecogito)
 
 config <- read_json(Sys.getenv("SR_CONFIG"))
 in_file <- fifo(Sys.getenv("SR_INPUT"), open="rt")
@@ -50,26 +46,19 @@ writeLabelAnswer <- function(input, doc) {
   flush(out_file)
 }
 
-tagset    <- c("LOCATION", "TIME", "PERSON")
-tagstyles <- "
-.tag-PERSON {
-color:red;
-}
-.tag-LOCATION {
-background-color:green;
-}
-.tag-TIME {
-font-weight: bold;
-}
-"
-ui <- fluidPage(tags$head(tags$style(HTML(tagstyles))),
+tagset <- c("LOCATION", "TIME", "PERSON")
+tagcss <- tags$style(HTML(
+  ".tag-PERSON   { color:red;   }",
+  ".tag-LOCATION { color:green; }",
+  ".tag-TIME     { color: gold; }"))
+
+ui <- fluidPage(tags$head(tagcss),
                 tags$br(),
                 recogitoOutput(outputId = "annotation_text"),
-                tags$hr(),
-                tags$h3("Results"),
-                verbatimTextOutput(outputId = "annotation_result"),
+                tags$hr(), 
                 actionButton("submit", "Submit"))
 
+# TODO STREAM IN/OUT DOCS https://jeroen.github.io/mongo-slides/#18
 server <- function(input, output) {
   state <- reactiveValues(doc=getDoc())
   
