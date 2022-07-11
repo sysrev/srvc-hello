@@ -82,3 +82,4 @@ flows:
       - run: "map/spacy-ner.py"
         labels:
           - annotation
+        model: "spacy-model"

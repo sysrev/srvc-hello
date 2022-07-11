@@ -2,3 +2,4 @@
 *.spacy
 .direnv/
 .ipynb_checkpoints/
+spacy-model/

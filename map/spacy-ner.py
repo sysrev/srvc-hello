@@ -52,12 +52,11 @@ def get_answers(event, label, reviewer):
     }
     return answer
 
-## Load pipeline
-nlp = spacy.load('output/model-last')
-
 config = json.load(open(os.environ['SR_CONFIG']))
 labels = config['current_labels']
 annotation_label = labels[0]
+
+nlp = spacy.load(config['current_step']['model'] + '/model-last')
 
 with open(os.environ['SR_INPUT']) as sr_input, open(os.environ['SR_OUTPUT'], 'a') as sr_output:
     for line in sr_input:
