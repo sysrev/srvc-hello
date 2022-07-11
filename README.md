@@ -1,5 +1,3 @@
-# srvc-hello
-
 ## Run with SRVC
 install srvc [github.com/sysrev/srvc](https://github.com/sysrev/srvc) and 
 ```sh
@@ -10,5 +8,4 @@ or
 sr review annotate
 ```
 
-## Run with Docker
-coming soon...
+Or run those commands at [srvc.sysrev.com](https://srvc.sysrev.com)
