@@ -33,7 +33,9 @@
    :headers {"Content-Type" "application/json"}
    :body (json/write-str json)})
 
-(defn submit-answers [{:keys [body]} {:keys [current-doc next-doc! writer]}]
+(defn submit-answers [{:keys [body]} {:keys [current-doc-events next-doc-events! writer]}]
+  (doseq [event @current-doc-events]
+    (sb/write-event writer event))
   (doseq [answer (-> body io/reader json/read)]
     (let [{:keys [errors valid?]} (-> (assoc answer :hash "")
                                       json/write-str json/read-str
@@ -42,10 +44,10 @@
         (sb/write-event writer answer)
         (throw (ex-info "Event failed validation"
                         {:errors errors :event answer})))))
-  (reset! current-doc (next-doc!))
+  (reset! current-doc-events (next-doc-events!))
   (json-response {:success true}))
 
-(defn handler [{:keys [config current-doc] :as opts}]
+(defn handler [{:keys [config current-doc-events] :as opts}]
  (fn [{:keys [request-method uri] :as request}]
    (cond
      (= "/" uri)
@@ -55,7 +57,7 @@
      (json-response config)
 
      (= "/current-doc" uri)
-     (json-response @current-doc)
+     (json-response (first @current-doc-events))
 
      (and (= :post request-method)
           (= "/submit-label-answers" uri))
@@ -67,27 +69,45 @@
      :else
      {:status 404 :body "Not Found"})))
 
+(defn partition-by-doc [lines]
+  (lazy-seq
+   (when-let [line (first lines)]
+     (let [event (json/read-str line :key-fn keyword)]
+       (loop [acc (transient [event])
+              [line & more :as lines] (next lines)]
+         (let [{:keys [type] :as event} (some-> line (json/read-str :key-fn keyword))]
+           (cond
+             (nil? line) [(persistent! acc)]
+             (= "document" type) (cons (persistent! acc)
+                                       (partition-by-doc lines))
+             :else (recur (conj! acc event) more))))))))
+
+(defn write-leading-non-docs [writer by-doc]
+  (if (= "document" (:type (ffirst by-doc)))
+    by-doc
+    (do
+      (doseq [event (first by-doc)]
+        (sb/write-event writer event))
+      (rest by-doc))))
+
 (let [config-file (System/getenv "SR_CONFIG")
       in-file (System/getenv "SR_INPUT")
       out-file (System/getenv "SR_OUTPUT")
       config (sb/get-config config-file)]
   (with-open [writer (io/writer out-file)]
-    (let [lines (-> in-file io/reader line-seq atom)
-          next-doc! (fn []
-                      (when-let [line (first @lines)]
-                        (.write writer line)
-                        (.write writer "\n")
-                        (.flush writer)
-                        (swap! lines rest)
-                        (let [{:keys [type] :as event} (json/read-str line :key-fn keyword)]
-                          (if (= "document" type)
-                            event
-                            (recur)))))
-          current-doc (atom (next-doc!))
+    (let [by-doc (->> in-file io/reader line-seq
+                      partition-by-doc
+                      (write-leading-non-docs writer)
+                      atom)
+          next-doc-events! (fn []
+                             (let [events (first @by-doc)]
+                               (swap! by-doc rest)
+                               events))
+          current-doc-events (atom (next-doc-events!))
           server (server/run-server
                   (handler {:config config
-                            :current-doc current-doc
-                            :next-doc! next-doc!
+                            :current-doc-events current-doc-events
+                            :next-doc-events! next-doc-events!
                             :writer writer})
                   {:ip "127.0.0.1"
                    :legacy-return-value? false
