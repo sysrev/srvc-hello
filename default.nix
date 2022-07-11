@@ -13,6 +13,17 @@ let
 
     propagatedBuildInputs = [ ps.spacy ];
   };
+  spacy-en-core-web-lg = ps.buildPythonPackage rec {
+    pname = "en_core_web_lg";
+    version = "3.3.0";
+
+    src = fetchTarball {
+      url = "https://github.com/explosion/spacy-models/releases/download/${pname}-${version}/${pname}-${version}.tar.gz";
+      sha256 = "sha256:1wawkq0glm99jvlycn5z64621i25b02irlddjy8dg5pkra8pnmb5";
+    };
+
+    propagatedBuildInputs = [ ps.spacy ];
+  };
 in with pkgs;
 mkShell {
   buildInputs = [
@@ -21,5 +32,6 @@ mkShell {
     ps.spacy
     rlwrap
     spacy-en-core-web-sm
+    spacy-en-core-web-lg
   ];
 }
