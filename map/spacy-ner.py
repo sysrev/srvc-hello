@@ -27,7 +27,7 @@ def web_annotation(start, end, tag, text):
         'type': 'Annotation'
     }
 
-def get_answers(event, label, reviewer):
+def get_answer(event, label, reviewer):
     doc = nlp(event['data']['abstract'])
 
     annos = []
@@ -61,9 +61,8 @@ nlp = spacy.load(config['current_step']['model'] + '/model-last')
 with open(os.environ['SR_INPUT']) as sr_input, open(os.environ['SR_OUTPUT'], 'a') as sr_output:
     for line in sr_input:
         sr_output.write(line)
-        sr_output.flush()
         event = json.loads(line)
         if event['type'] == 'document' and event['data'].get('abstract'):
-            answer = get_answers(event, annotation_label, config['reviewer'])
+            answer = get_answer(event, annotation_label, config['reviewer'])
             sr_output.write(json.dumps(answer))
-            sr_output.flush()
+        sr_output.flush()
