@@ -8,7 +8,7 @@ labels:
     type: boolean
     question: Acute toxicity?
   annotation:
-    type: annotation
+    type: webannotation
     question: Annotation
   eye_irrit:
     type: boolean

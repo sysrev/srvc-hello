@@ -2,29 +2,26 @@
 
 import json, spacy
 
-from spacy.tokens import DocBin
+from spacy.tokens import DocBin, Span
 
 nlp = spacy.blank('en')
 
+def type_eq(s):
+    return lambda x: x['type'] == s
+
 def build_spacy_doc(events, event):
-    recogito = event['data']['answer']
-    tags = filter(lambda x: x['type'] == 'TAG', recogito)
-    tags = sorted(tags, key = lambda x: x['chunk_start'])
+    # Convert WebAnnotation to spacy Doc
     doc = nlp(events[event['data']['document']]['data']['abstract'])
 
-    tit = iter(doc)
-    tkn = next(tit)
-    for ann in tags:
-        start = ann['chunk_start'] - 16 # Correct bad data from R
-        if ann['type'] == 'TAG':
-            while tkn.idx < start:
-                tkn = next(tit)
-            if tkn.idx == start and tkn.text == ann['chunk_text']:
-                # mismatch: spacy only has one tag, but recogito allows many
-                tkn.tag_ = ann['label'][0]
-            elif tkn.idx > start:
-                raise Exception('Failed to match recogito chunk to spacy token')
+    ents = []
+    for webann in event['data']['answer']:
+        tagging = filter(lambda x: x['purpose'] == 'tagging', webann['body'])
+        tag = next(tagging)['value']
 
+        pos = next(filter(type_eq('TextPositionSelector'), webann['target']['selector']))
+        ents.append(Span(doc, pos['start'], pos['end'], tag))
+
+    doc.set_ents(ents)
     return doc
 
 with open('sink.jsonl', 'rt') as sink:
