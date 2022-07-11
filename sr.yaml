@@ -44,6 +44,16 @@ flows:
           - acute_tox
           - eye_irrit
 
+  srrecogito:
+    steps:
+      - run: "gen/gen.clj"
+
+      - run: "map/remove-reviewed.clj"
+
+      - run: "map/shiny-map.R"
+        labels:
+          - annotation
+          
   annotate:
     steps:
       - run: "gen/gen.clj"
