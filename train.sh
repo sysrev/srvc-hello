@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
-python -m spacy train config.cfg --output ./spacy-model
+set -e
 
+./recogito-to-spacy.py
+python -m spacy train config.cfg --output ./spacy-model

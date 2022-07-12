@@ -19,7 +19,8 @@ def build_spacy_doc(events, event):
         tag = next(tagging)['value']
 
         pos = next(filter(type_eq('TextPositionSelector'), webann['target']['selector']))
-        ents.append(Span(doc, pos['start'], pos['end'], tag))
+        span = doc.char_span(pos['start'], pos['end'], label=tag, alignment_mode="expand")
+        ents.append(span)
 
     doc.set_ents(ents)
     return doc
