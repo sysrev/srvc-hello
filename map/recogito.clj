@@ -56,8 +56,8 @@
      (= "/config" uri)
      (json-response config)
 
-     (= "/current-doc" uri)
-     (json-response (first @current-doc-events))
+     (= "/current-doc-events" uri)
+     (json-response @current-doc-events)
 
      (and (= :post request-method)
           (= "/submit-label-answers" uri))

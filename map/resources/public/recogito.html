@@ -41,7 +41,7 @@ h1 {
 <script type="text/javascript">
     (function() {
       var config = null
-      var currentDoc = null
+      var currentDocEvents = null
       var el = document.getElementById('recogito')
       var mode = "ANNOTATION"
       var submit = document.getElementById('recogito-submit')
@@ -67,25 +67,33 @@ h1 {
         req.send()
       }
 
-      var loadCurrentDoc = function () {
+      var loadCurrentDocEvents = function () {
         var req = new XMLHttpRequest()
         req.addEventListener("load", function (resp) {
           r.clearAnnotations()
-          currentDoc = JSON.parse(req.response)
-          el.innerText = currentDoc['data']['abstract']
+          currentDocEvents = JSON.parse(req.response)
+          el.innerText = currentDocEvents[0]['data']['abstract']
+          currentDocEvents.forEach(function (event) {
+            if ( 'label-answer' == event['type']
+                 && currentDocEvents[0]['hash'] == event['data']['document']) {
+              event['data']['answer'].forEach(function (webanno) {
+                r.addAnnotation(webanno)
+              })
+            }
+          })
         })
-        req.open("GET", "/current-doc")
+        req.open("GET", "/current-doc-events")
         req.send()
       }
 
       var submitDoc = function() {
         var req = new XMLHttpRequest()
         req.addEventListener("load", function (resp) {
-          loadCurrentDoc()
+          loadCurrentDocEvents()
         })
         req.open("POST", "/submit-label-answers")
         var answer = {"data": {"answer": r.getAnnotations(),
-                               "document": currentDoc.hash,
+                               "document": currentDocEvents[0].hash,
                                "label": config.current_labels[0].hash,
                                "reviewer": config.reviewer,
                                "timestamp": Math.floor(Date.now() / 1000)},
@@ -96,7 +104,7 @@ h1 {
       submit.addEventListener("click", submitDoc)
 
       loadConfig()
-      loadCurrentDoc()
+      loadCurrentDocEvents()
     })();
   </script>
 </body>

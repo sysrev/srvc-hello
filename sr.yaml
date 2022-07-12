@@ -83,3 +83,7 @@ flows:
         labels:
           - annotation
         model: "spacy-model"
+
+      - run: "map/recogito.clj"
+        labels:
+          - annotation
