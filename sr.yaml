@@ -56,9 +56,9 @@ flows:
           
   annotate:
     steps:
-      - run: "gen/gen.clj"
+      - run_embedded: "generator-file gendocs.jsonl"
 
-      - run: "map/remove-reviewed.clj"
+      - run_embedded: "remove-reviewed"
       
       - run: "map/recogito.clj"
         labels:

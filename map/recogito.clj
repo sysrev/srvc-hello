@@ -14,6 +14,11 @@
          '[srvc.bb :as sb]
          '[srvc.bb.json-schema :as bjs])
 
+(defn write-event [writer event]
+  (json/write event writer)
+  (.write writer "\n")
+  (.flush writer))
+
 (def resource-path
   (-> *file*
       fs/real-path ; Resolve symlinks
@@ -35,13 +40,14 @@
 
 (defn submit-answers [{:keys [body]} {:keys [current-doc-events next-doc-events! writer]}]
   (doseq [event @current-doc-events]
-    (sb/write-event writer event))
+    (write-event writer event))
   (doseq [answer (-> body io/reader json/read)]
     (let [{:keys [errors valid?]} (-> (assoc answer :hash "")
                                       json/write-str json/read-str
-                                      bjs/validate)]
+                                      bjs/validate)
+          {:valid? true}]
       (if valid?
-        (sb/write-event writer answer)
+        (write-event writer answer)
         (throw (ex-info "Event failed validation"
                         {:errors errors :event answer})))))
   (reset! current-doc-events (next-doc-events!))
@@ -87,15 +93,22 @@
     by-doc
     (do
       (doseq [event (first by-doc)]
-        (sb/write-event writer event))
+        (write-event writer event))
       (rest by-doc))))
 
+(defn socket [addr]
+  (let [[host port] (str/split addr #"\:")]
+    (java.net.Socket. host (parse-long port))))
+
+(defn socket-lines [addr]
+  (-> addr socket io/reader line-seq))
+
 (let [config-file (System/getenv "SR_CONFIG")
-      in-file (System/getenv "SR_INPUT")
-      out-file (System/getenv "SR_OUTPUT")
+      input (System/getenv "SR_INPUT")
+      output (System/getenv "SR_OUTPUT")
       config (sb/get-config config-file)]
-  (with-open [writer (io/writer out-file)]
-    (let [by-doc (->> in-file io/reader line-seq
+  (with-open [writer (-> output socket io/writer)]
+    (let [by-doc (->> input socket-lines
                       partition-by-doc
                       (write-leading-non-docs writer)
                       atom)
