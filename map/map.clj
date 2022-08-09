@@ -3,9 +3,9 @@
 (require '[babashka.deps :as deps]
          '[clojure.string :as str])
 
-(deps/add-deps '{:deps {co.insilica/bb-srvc {:mvn/version "0.4.0"}}})
+(deps/add-deps '{:deps {co.insilica/bb-srvc {:mvn/version "0.7.0"}}})
 
-(require '[insilica.canonical-json :as json]
+(require '[clojure.data.json :as json]
          '[srvc.bb :as sb])
 
 (defmulti read-answer :type)
@@ -57,9 +57,10 @@
         response))))
 
 (defn read-answers [labels]
+  (prn labels)
   (when (seq labels)
     (loop [answers {}
-           [{:keys [data hash]}
+           [{:keys [hash] :as data}
             & more] labels]
       (let [{:keys [inclusion_values]} data
             answer (read-answer data)

@@ -8,16 +8,11 @@
 
 (import '[java.net URLDecoder])
 
-(deps/add-deps '{:deps {co.insilica/bb-srvc {:mvn/version "0.6.0"}}})
+(deps/add-deps '{:deps {co.insilica/bb-srvc {:mvn/version "0.7.0"}}})
 
-(require '[insilica.canonical-json :as json]
+(require '[clojure.data.json :as json]
          '[srvc.bb :as sb]
          '[srvc.bb.json-schema :as bjs])
-
-(defn write-event [writer event]
-  (json/write event writer)
-  (.write writer "\n")
-  (.flush writer))
 
 (def resource-path
   (-> *file*
@@ -40,14 +35,14 @@
 
 (defn submit-answers [{:keys [body]} {:keys [current-doc-events next-doc-events! writer]}]
   (doseq [event @current-doc-events]
-    (write-event writer event))
+    (sb/write-event writer event))
   (doseq [answer (-> body io/reader json/read)]
     (let [{:keys [errors valid?]} (-> (assoc answer :hash "")
                                       json/write-str json/read-str
                                       bjs/validate)
           {:valid? true}]
       (if valid?
-        (write-event writer answer)
+        (sb/write-event writer answer)
         (throw (ex-info "Event failed validation"
                         {:errors errors :event answer})))))
   (reset! current-doc-events (next-doc-events!))
@@ -93,7 +88,7 @@
     by-doc
     (do
       (doseq [event (first by-doc)]
-        (write-event writer event))
+        (sb/write-event writer event))
       (rest by-doc))))
 
 (defn socket [addr]
@@ -103,12 +98,9 @@
 (defn socket-lines [addr]
   (-> addr socket io/reader line-seq))
 
-(let [config-file (System/getenv "SR_CONFIG")
-      input (System/getenv "SR_INPUT")
-      output (System/getenv "SR_OUTPUT")
-      config (sb/get-config config-file)]
-  (with-open [writer (-> output socket io/writer)]
-    (let [by-doc (->> input socket-lines
+(let [config (sb/get-config)]
+  (with-open [writer (sb/get-output-writer)]
+    (let [by-doc (->> (sb/get-input-lines)
                       partition-by-doc
                       (write-leading-non-docs writer)
                       atom)
@@ -126,8 +118,8 @@
                    :legacy-return-value? false
                    :port (:port config 0)})
           port (server/server-port server)]
-      (write-event writer {:type "control"
-                           :data {:http-port port
-                                  :timestamp (quot (System/currentTimeMillis) 1000)}})
+      (sb/write-event writer {:type "control"
+                              :data {:http-port port
+                                     :timestamp (quot (System/currentTimeMillis) 1000)}})
       (println (str "Listening on http://127.0.0.1:" port))
       (Thread/sleep Long/MAX_VALUE))))

@@ -32,11 +32,23 @@ labels:
     question: Substance
 
 flows:
+  rr:
+    steps:
+      - run_embedded: "generator-file gendocs.jsonl"
+
+      - run_embedded: "remove-reviewed"
+
+  rsrr:
+    steps:
+      - run_embedded: "generator-file gendocs.jsonl"
+
+      - run_embedded: "remove-reviewed"
+
   simple:
     steps:
-      - run: "gen/gen.clj"
+      - run_embedded: "generator-file gendocs.jsonl"
 
-      - run: "map/remove-reviewed.clj"
+      - run_embedded: "remove-reviewed"
       
       - run: "map/map.clj"
         labels:
@@ -46,9 +58,9 @@ flows:
 
   srrecogito:
     steps:
-      - run: "gen/gen.clj"
+      - run_embedded: "generator-file gendocs.jsonl"
 
-      - run: "map/remove-reviewed.clj"
+      - run_embedded: "remove-reviewed"
 
       - run: "map/shiny-map.R"
         labels:
@@ -66,9 +78,9 @@ flows:
 
   jupyter:
     steps:
-      - run: "gen/gen.clj"
+      - run_embedded: "generator-file gendocs.jsonl"
 
-      - run: "map/remove-reviewed.clj"
+      - run_embedded: "remove-reviewed"
 
       - run: "map/jupyter.clj"
         labels:
@@ -77,7 +89,7 @@ flows:
 
   spacy:
     steps:
-      - run: "gen/gen.clj"
+      - run_embedded: "generator-file gendocs.jsonl"
 
       - run: "map/spacy-ner.py"
         labels:
