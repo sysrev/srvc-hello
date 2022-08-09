@@ -124,6 +124,10 @@
                             :writer writer})
                   {:ip "127.0.0.1"
                    :legacy-return-value? false
-                   :port (:port config 0)})]
-      (println (str "Listening on http://127.0.0.1:" (server/server-port server)))
+                   :port (:port config 0)})
+          port (server/server-port server)]
+      (write-event writer {:type "control"
+                           :data {:http-port port
+                                  :timestamp (quot (System/currentTimeMillis) 1000)}})
+      (println (str "Listening on http://127.0.0.1:" port))
       (Thread/sleep Long/MAX_VALUE))))
