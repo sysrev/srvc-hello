@@ -32,6 +32,17 @@ labels:
     question: Substance
 
 flows:
+  url:
+    steps:
+      - run: "gen/url.clj http://localhost:8000/docs.json"
+
+      - run: "map/remove-reviewed.clj"
+
+      - run: "map/map.clj"
+        labels:
+          - substance
+          - acute_tox
+          - eye_irrit
   simple:
     steps:
       - run: "gen/gen.clj"
