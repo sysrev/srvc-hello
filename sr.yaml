@@ -34,7 +34,7 @@ labels:
 flows:
   html_label:
     steps:
-      - run_embedded: "generator-file gendocs.jsonl"
+      - run_embedded: "generator-file data/docs.jsonl"
 
       - run_embedded: "remove-reviewed"
       
@@ -46,13 +46,13 @@ flows:
 
   rr:
     steps:
-      - run_embedded: "generator-file gendocs.jsonl"
+      - run_embedded: "generator-file data/docs.jsonl"
 
       - run_embedded: "remove-reviewed"
 
   rsrr:
     steps:
-      - run_embedded: "generator-file gendocs.jsonl"
+      - run_embedded: "generator-file data/docs.jsonl"
 
       - run_embedded: "remove-reviewed"
 
@@ -70,7 +70,7 @@ flows:
 
   srrecogito:
     steps:
-      - run_embedded: "generator-file gendocs.jsonl"
+      - run_embedded: "generator-file data/docs.jsonl"
 
       - run_embedded: "remove-reviewed"
 
@@ -80,7 +80,7 @@ flows:
           
   annotate:
     steps:
-      - run_embedded: "generator-file gendocs.jsonl"
+      - run_embedded: "generator-file data/docs.jsonl"
 
       - run_embedded: "remove-reviewed"
       
@@ -90,7 +90,7 @@ flows:
 
   jupyter:
     steps:
-      - run_embedded: "generator-file gendocs.jsonl"
+      - run_embedded: "generator-file data/docs.jsonl"
 
       - run_embedded: "remove-reviewed"
 
@@ -101,13 +101,11 @@ flows:
 
   spacy:
     steps:
-      - run_embedded: "generator-file gendocs.jsonl"
+      - run_embedded: "generator-file data/docs.jsonl"
 
       - run: "map/spacy-ner.py"
-        labels:
-          - annotation
+        labels: [annotation]
         model: "spacy-model"
 
       - run: "map/recogito.clj"
-        labels:
-          - annotation
+        labels: [annotation]
