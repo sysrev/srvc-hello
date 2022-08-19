@@ -105,7 +105,7 @@ flows:
 
       - run: "map/spacy-ner.py"
         labels: [annotation]
-        model: "spacy-model"
+        model: "https://s3.amazonaws.com/ins.pins/spacy-entox.pickle"
 
       - run: "map/recogito.clj"
         labels: [annotation]
