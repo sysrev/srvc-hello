@@ -1,5 +1,4 @@
 db: "sink.jsonl"
-#db: "http://localhost:8090"
 
 reviewer: mailto:user@example.com
 
@@ -35,33 +34,17 @@ flows:
   html_label:
     steps:
       - run_embedded: "generator-file data/docs.jsonl"
-
       - run_embedded: "remove-reviewed"
-      
       - run: "map/html_label.clj"
         labels:
           - substance
           - acute_tox
           - eye_irrit
 
-  rr:
-    steps:
-      - run_embedded: "generator-file data/docs.jsonl"
-
-      - run_embedded: "remove-reviewed"
-
-  rsrr:
-    steps:
-      - run_embedded: "generator-file data/docs.jsonl"
-
-      - run_embedded: "remove-reviewed"
-
   simple:
     steps:
       - run_embedded: "generator-file data/docs.jsonl"
-
       - run_embedded: "remove-reviewed"
-      
       - run_embedded: "label"
         labels:
           - substance
@@ -71,47 +54,21 @@ flows:
   srrecogito:
     steps:
       - run_embedded: "generator-file data/docs.jsonl"
-
-      - run_embedded: "remove-reviewed"
-
-      - run: "map/shiny-map.R"
-        labels:
-          - annotation
+      - run: "map/shiny-recogito.R"
+        labels: [annotation]
           
   annotate:
     steps:
       - run_embedded: "generator-file data/docs.jsonl"
-
       - run_embedded: "remove-reviewed"
-      
       - run: "map/recogito.clj"
-        labels:
-          - annotation
-
-  jupyter:
-    steps:
-      - run_embedded: "generator-file data/docs.jsonl"
-
-      - run_embedded: "remove-reviewed"
-
-      - run: "map/jupyter.clj"
-        labels:
-          - acute_tox
-          - eye_irrit
+        labels: [annotation]
 
   spacy:
     steps:
       - run_embedded: "generator-file data/docs.jsonl"
-
       - run: "map/spacy-ner.py"
         labels: [annotation]
         model: "https://s3.amazonaws.com/ins.pins/spacy.zip"
-
       - run: "map/recogito.clj"
-        labels: [annotation]
-
-  srrecogito:
-    steps:
-      - run_embedded: "generator-file data/docs.jsonl"
-      - run: "map/shiny-recogito.R"
         labels: [annotation]
