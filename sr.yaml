@@ -109,3 +109,9 @@ flows:
 
       - run: "map/recogito.clj"
         labels: [annotation]
+
+  srrecogito:
+    steps:
+      - run_embedded: "generator-file data/docs.jsonl"
+      - run: "map/shiny-recogito.R"
+        labels: [annotation]
