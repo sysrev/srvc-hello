@@ -1,19 +1,35 @@
 #!/usr/bin/env python
-import json, math, os, spacy, time, uuid, time, asyncio, re, requests, pickle, zipfile
+import json, math, os, spacy, time, uuid, time, asyncio, re, zipfile, requests, sys
 
-def get_spacy_model(url="https://s3.amazonaws.com/ins.pins/spacy-entox.zip"):
-    file="data/spacy-entox.zip"
-    if not os.path.exists(file):
-        with open(file, 'wb') as fout:
-            response = requests.get(url, stream=True)
-            for block in response.iter_content(4096): 
-                fout.write(block)
-    
-    if not os.path.exists("data/spacy-entox"):
-        with zipfile.ZipFile(file,'r') as zip_ref:
-            zip_ref.extractall("data")
+def download(url, filename, msg):
+    sys.stdout.write(msg)
+    with open(filename, 'wb') as f:
+        response = requests.get(url, stream=True)
+        total = response.headers.get('content-length')
 
-    return spacy.load("data/spacy-entox")
+        if total is None:
+            f.write(response.content)
+        else:
+            downloaded = 0
+            total = int(total)
+            for data in response.iter_content(chunk_size=max(int(total/1000), 1024*1024)):
+                downloaded += len(data)
+                f.write(data)
+                done = int(50*downloaded/total)
+                sys.stdout.write('\r[{}{}]'.format('=' * done, '.' * (50-done)))
+                sys.stdout.flush()
+    sys.stdout.write('\n')
+
+def unzip(file,path): 
+    with zipfile.ZipFile(file,'r') as zip_ref:
+        zip_ref.extractall(path)
+        zip_ref.close()
+
+def get_spacy_model(url):
+    "download a spacy model from a url and unzip into data/spacy"
+    if not os.path.exists("data/spacy.zip"): download(url, "data/spacy.zip", "downloading spacy model\n")
+    if not os.path.exists("data/spacy"): unzip("data/spacy.zip","data")        
+    return spacy.load("data/spacy")
 
 def web_annotation(start, end, tag, text):
     return { '@context': 'http://www.w3.org/ns/anno.jsonld',
