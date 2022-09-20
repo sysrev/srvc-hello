@@ -25,7 +25,7 @@ def build_spacy_doc(events, event):
     doc.set_ents(ents)
     return doc
 
-with open('sink.jsonl', 'rt') as sink:
+with open('../../sink.jsonl', 'rt') as sink:
     doc_bin = DocBin()
     events = {}
     for line in sink:

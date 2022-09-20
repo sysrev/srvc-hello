@@ -1,0 +1,47 @@
+---
+title: "counting things"
+---
+
+# Build table from sink.jsonl
+```{r}
+pacman::p_load(tidyverse, jsonlite)
+
+jsonlines <- readr::read_lines("sink.jsonl") |> map(jsonlite::fromJSON)
+jtbl <- tibble(lines=jsonlines) |> unnest_wider(lines)
+jtbl |> select(hash,type,uri,data,uri)
+```
+
+1. **hash**: a content-hash derived from the `data` object
+2. **type**: a name for the schema of the `data` object
+3. **data**: json object w/ schema in `type`
+4. **uri**: an optional resource identifier 
+
+# Count types
+```{r}
+jtbl |> count(type,sort=T)
+```
+
+# What is a document, label, label-answer?
+```{r}
+raw.doc <- jtbl |> filter(type=="document") |> select(data) |> unnest_wider(data)
+raw.doc
+
+raw.lbl <- jtbl |> filter(type=="label") |> select(data) |> unnest_wider(data)
+raw.lbl
+
+raw.ans <- jtbl |> filter(type=="label-answer") |> select(data) |> unnest_wider(data) 
+raw.ans
+```
+
+# Can we make a wide format?
+```{r}
+ans <- raw.ans |> select(document,label,answer) |> mutate(answer = map(answer,as.character)) |> 
+  unnest_longer(answer, transform=as.character)
+
+doc <- filter(jtbl,type=="document") |> select(document=hash,data) |> unnest_wider(data)
+lbl <- filter(jtbl,type=="label") |> select(label=hash,data) |> unnest_wider(data) |> 
+  select(label,lbl.type=type,question)
+
+ans |> inner_join(doc,by="document") |> inner_join(lbl,by="label") |> 
+  select(document,label,title,abstract,question,answer) |> distinct()
+```

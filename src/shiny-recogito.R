@@ -8,8 +8,9 @@ pacman::p_load(shiny, jsonlite, srrecogito)
 cfg <- read_json(Sys.getenv("SR_CONFIG"))
 
 mksock <- purrr::compose(~ socketConnection(.[[1]],.[[2]],blocking=T), ~ strsplit(.,":")[[1]])
-sr_output <- mksock(Sys.getenv("SR_OUTPUT"),":")
 sr_input  <- mksock(Sys.getenv("SR_INPUT"),":")
+sr_output <- mksock(Sys.getenv("SR_OUTPUT"),":")
+
 
 # HELPER FUNCTIONS  =============================================================================
 getDoc <- function(){
