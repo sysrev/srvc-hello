@@ -3,7 +3,7 @@
 # DEPENDENCIES, CONFIGURATION AND SOCKETS =======================================================
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load_gh("sysrev/srrecogito")
-pacman::p_load(shiny, jsonlite, srrecogito)
+pacman::p_load(shiny, jsonlite, recogito, srrecogito)
 
 cfg <- read_json(Sys.getenv("SR_CONFIG"))
 
@@ -37,8 +37,8 @@ writeLabelAnswer <- function(input, d){
 }
 
 # HTML TEMPLATE  =================================================================================
-tagset <- c("LOCATION", "TIME", "PERSON")
-colors <- c("red","green","gold")
+tagset <- c("CHEMICAL", "TIME", "PERSON")
+colors <- c("#00eeff","green","gold")
 tagcss <- tags$style(HTML(glue::glue("\n\n.tag-{tagset} {{ color:{colors}; }}\n\n")))
 
 ui <- fluidPage(
