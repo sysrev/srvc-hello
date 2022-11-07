@@ -51,12 +51,6 @@ flows:
           - substance
           - acute_tox
           - eye_irrit
-
-  srrecogito:
-    steps:
-      - run_embedded: "generator-file data/docs.jsonl"
-      - run: "src/shiny-recogito.R"
-        labels: [annotation]
           
   annotate:
     steps:
