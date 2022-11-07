@@ -1,5 +1,4 @@
 .*
-*.jsonl
 *.spacy
 .direnv/
 .ipynb_checkpoints/
