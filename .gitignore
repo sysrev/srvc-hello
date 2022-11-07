@@ -4,3 +4,5 @@
 .direnv/
 .ipynb_checkpoints/
 spacy-model/
+
+!.editorconfig
