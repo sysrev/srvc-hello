@@ -25,5 +25,13 @@
     "forwardPorts": [],
     "mounts": [
         "source=nix_store,target=/nix,type=volume"
-    ]
+    ],
+    "customizations": {
+        "codespaces": {
+            "openFiles": [
+                "README.md",
+                "sr.yaml"
+            ]
+        }
+    }
 }
