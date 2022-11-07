@@ -5,4 +5,7 @@
 .ipynb_checkpoints/
 spacy-model/
 
+!.devcontainer
 !.editorconfig
+!.envrc
+!.vscode

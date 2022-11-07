@@ -2,16 +2,16 @@
 let
   srvc = pkgs.rustPlatform.buildRustPackage rec {
     pname = "srvc";
-    version = "0.6.0";
+    version = "0.8.0";
 
     src = pkgs.fetchFromGitHub {
       owner = "insilica";
       repo = "rs-srvc";
       rev = "v${version}";
-      sha256 = "sha256-PBs86cvEacvCt/2JnURL4qKvXGXRZHWaGYrPUSsnt0I=";
+      sha256 = "sha256-2eEuKAMxxTwjDInpYcOlFJha5DTe0IrxT5rI6ymN0hc=";
     };
 
-    cargoSha256 = "sha256-5CUbfI67gsINdHcxN8KbIN10Mu90rAU53DbmQ5QotWg=";
+    cargoSha256 = "sha256-nJM7/w4awbCZQysUOSTO6bfsBXO3agJRdp1RyRZhtUY=";
   };
   ps = pkgs.python310Packages;
   spacy-en-core-web-sm = ps.buildPythonPackage rec {
@@ -40,6 +40,10 @@ let
   };
 in with pkgs;
 mkShell {
-  buildInputs =
-    [ babashka ps.spacy rlwrap spacy-en-core-web-sm spacy-en-core-web-lg srvc ];
+  buildInputs = [
+    ps.spacy
+    spacy-en-core-web-sm
+    spacy-en-core-web-lg
+    srvc
+  ];
 }
