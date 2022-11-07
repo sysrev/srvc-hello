@@ -46,7 +46,8 @@ flows:
     steps:
       - run_embedded: "generator-file data/docs.jsonl"
       - run_embedded: "remove-reviewed"
-      - run: "src/html_label.clj"
+      - run_embedded: "html src/resources/public/label.html"
+        port: 5000
         labels:
           - substance
           - acute_tox
@@ -56,7 +57,8 @@ flows:
     steps:
       - run_embedded: "generator-file data/docs.jsonl"
       - run_embedded: "remove-reviewed"
-      - run: "src/recogito.clj"
+      - run_embedded: "html src/resources/public/recogito.html"
+        port: 5001
         labels: [annotation]
 
   spacy:
@@ -65,5 +67,6 @@ flows:
       - run: "src/spacy-ner.py"
         labels: [annotation]
         model: "https://s3.amazonaws.com/ins.pins/spacy.zip"
-      - run: "src/recogito.clj"
+      - run_embedded: "html src/resources/public/recogito.html"
+        port: 5002
         labels: [annotation]

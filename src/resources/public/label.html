@@ -151,7 +151,8 @@ h1 {
           loadCurrentDocEvents()
         })
         req.open("POST", "/submit-label-answers")
-        req.send(JSON.stringify(labelAnswers()))
+        req.setRequestHeader("Content-Type", "application/json")
+        req.send(JSON.stringify({"answers":labelAnswers()}))
       }
 
       submitEl.addEventListener("click", submitDoc)
