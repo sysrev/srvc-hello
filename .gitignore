@@ -8,4 +8,5 @@ spacy-model/
 !.devcontainer
 !.editorconfig
 !.envrc
+!.github
 !.vscode

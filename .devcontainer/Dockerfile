@@ -1,2 +1,2 @@
-FROM ghcr.io/xtruder/nix-devcontainer:v1
+FROM insilica/srvc-hello
 VOLUME /nix
