@@ -2,6 +2,7 @@
 *.spacy
 .direnv/
 .ipynb_checkpoints/
+result
 spacy-model/
 
 !.devcontainer
