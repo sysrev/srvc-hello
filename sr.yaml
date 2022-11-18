@@ -5,30 +5,54 @@ reviewer: mailto:user@example.com
 labels:
   acute_tox:
     type: boolean
+    json_schema_url: https://raw.githubusercontent.com/insilica/rs-srvc/master/src/schema/label-answer/boolean-v1.json
     question: Acute toxicity?
   annotation:
     type: webannotation
     question: Annotation
   eye_irrit:
     type: boolean
+    json_schema_url: https://raw.githubusercontent.com/insilica/rs-srvc/master/src/schema/label-answer/boolean-v1.json
     question: Eye irritation?
-  substance:
-    type: categorical
-    categories:
-      - sodium laureth sulfate
-      - sodium lauryl sulfoacetate
-      - sodium cocoyl glycinate
-      - disodium cocoyl glutamate
-      - decyl glucoside
-      - lauryl glucoside
-    inclusion_values:
-      - sodium laureth sulfate
-      - sodium lauryl sulfoacetate
-      - sodium cocoyl glycinate
-      - disodium cocoyl glutamate
-      - decyl glucoside
-      - lauryl glucoside
-    question: Substance
+  group_label:
+    type: object
+    json_schema:
+      $schema: http://json-schema.org/draft-07/schema
+      type: array
+      items:
+        type: object
+        properties:
+          acute_tox:
+            type: boolean
+          eye_irrit:
+            type: boolean
+          substances:
+            type: array
+            items:
+              type: string
+              enum:
+                - sodium laureth sulfate
+                - sodium lauryl sulfoacetate
+                - sodium cocoyl glycinate
+                - disodium cocoyl glutamate
+                - decyl glucoside
+                - lauryl glucoside
+    question: Group Label
+  substances:
+    type: strings
+    json_schema:
+      $schema: http://json-schema.org/draft-07/schema
+      type: array
+      items:
+        type: string
+        enum:
+          - sodium laureth sulfate
+          - sodium lauryl sulfoacetate
+          - sodium cocoyl glycinate
+          - disodium cocoyl glutamate
+          - decyl glucoside
+          - lauryl glucoside
+    question: Substance(s)
 
 flows:
 
@@ -38,9 +62,18 @@ flows:
       - run_embedded: "remove-reviewed"
       - run_embedded: "label"
         labels:
-          - substance
+          - substances
           - acute_tox
           - eye_irrit
+
+  group_label:
+    steps:
+      - run_embedded: "generator-file data/docs.jsonl"
+      - run_embedded: "remove-reviewed"
+      - run_embedded: "html src/resources/public/label.html"
+        port: 5003
+        labels:
+          - group_label
 
   html_label:
     steps:
@@ -49,10 +82,10 @@ flows:
       - run_embedded: "html src/resources/public/label.html"
         port: 5000
         labels:
-          - substance
+          - substances
           - acute_tox
           - eye_irrit
-          
+
   annotate:
     steps:
       - run_embedded: "generator-file data/docs.jsonl"
