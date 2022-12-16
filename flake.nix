@@ -15,8 +15,9 @@
       inputs.flake-utils.follows = "flake-utils";
       inputs.pypi-deps-db.follows = "pypi-deps-db";
     };
+    srvc.url = "github:insilica/rs-srvc";
   };
-  outputs = { self, nixpkgs, flake-utils, mach-nix, ... }@inputs:
+  outputs = { self, nixpkgs, flake-utils, mach-nix, srvc, ... }@inputs:
     flake-utils.lib.eachDefaultSystem (system:
       with import nixpkgs { inherit system; };
       let
@@ -66,4 +67,8 @@
           '';
         };
       in { packages = { inherit spacy spacy-python; }; });
+        devShells.default = mkShell {
+          buildInputs = [ spacy-python srvc.packages.${system}.default ];
+        };
+      });
 }
