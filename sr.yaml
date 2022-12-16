@@ -103,3 +103,13 @@ flows:
       - run_embedded: "html src/resources/public/recogito.html"
         port: 5002
         labels: [annotation]
+
+  spacy-flake:
+    steps:
+      - run_embedded: "generator-file data/docs.jsonl"
+      - uses: github:sysrev/srvc-hello#spacy
+        labels: [annotation]
+        model: "https://s3.amazonaws.com/ins.pins/spacy.zip"
+      - run_embedded: "html src/resources/public/recogito.html"
+        port: 5002
+        labels: [annotation]
