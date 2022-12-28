@@ -66,7 +66,8 @@
             cp spacy-ner.py $out/bin/spacy
           '';
         };
-      in { packages = { inherit spacy spacy-python; }; });
+      in {
+        packages = { inherit spacy spacy-python; };
         devShells.default = mkShell {
           buildInputs = [ spacy-python srvc.packages.${system}.default ];
         };
