@@ -20,7 +20,7 @@ def download(url, filename, msg):
                 sys.stdout.flush()
     sys.stdout.write('\n')
 
-def unzip(file,path): 
+def unzip(file,path):
     with zipfile.ZipFile(file,'r') as zip_ref:
         zip_ref.extractall(path)
         zip_ref.close()
@@ -28,7 +28,7 @@ def unzip(file,path):
 def get_spacy_model(url):
     "download a spacy model from a url and unzip into data/spacy"
     if not os.path.exists("data/spacy.zip"): download(url, "data/spacy.zip", "downloading spacy model\n")
-    if not os.path.exists("data/spacy"): unzip("data/spacy.zip","data")        
+    if not os.path.exists("data/spacy"): unzip("data/spacy.zip","data")
     return spacy.load("data/spacy")
 
 def web_annotation(start, end, tag, text):
@@ -51,11 +51,13 @@ def get_answer(nlp, event, label, reviewer):
     return {'data': data, 'type':'label-answer'}
 
 async def main():
+    limit = limit = 1024 * 1024 * 10 # Allow lines up to 10 MiB
+
     ihost,iport = os.environ["SR_INPUT"].split(":")
-    sr_input, _ = await asyncio.open_connection(ihost, iport)
-    
+    sr_input, _ = await asyncio.open_connection(ihost, iport, limit=limit)
+
     ohost,oport = os.environ["SR_OUTPUT"].split(":")
-    _, sr_output = await asyncio.open_connection(ohost, oport)
+    _, sr_output = await asyncio.open_connection(ohost, oport, limit=limit)
 
     config = json.load(open(os.environ['SR_CONFIG']))
     annotation_label = config['current_labels'][0] # TODO how to get the annotation label?
@@ -63,7 +65,7 @@ async def main():
 
     while True:
         line = await sr_input.readline()
-        if not line: break;
+        if not line: break
 
         sr_output.write(line)
         await sr_output.drain()
