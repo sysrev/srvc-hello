@@ -60,8 +60,8 @@ async def main():
     _, sr_output = await asyncio.open_connection(ohost, oport, limit=limit)
 
     config = json.load(open(os.environ['SR_CONFIG']))
-    annotation_label = config['current_labels'][0] # TODO how to get the annotation label?
-    nlp = get_spacy_model(config['current_step']['model'])
+    annotation_label = (config['current-labels'] or config['current_labels'])[0] # TODO how to get the annotation label?
+    nlp = get_spacy_model((config['current-step'] or config['current_step'])['model'])
 
     while True:
         line = await sr_input.readline()
