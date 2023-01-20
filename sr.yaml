@@ -3,56 +3,25 @@ db: "sink.jsonl"
 reviewer: mailto:user@example.com
 
 labels:
-  acute_tox:
-    type: boolean
-    json_schema_url: https://raw.githubusercontent.com/insilica/rs-srvc/master/src/schema/label-answer/boolean-v1.json
-    question: Acute toxicity?
   annotation:
     type: webannotation
-    question: Annotation
-  eye_irrit:
-    type: boolean
-    json_schema_url: https://raw.githubusercontent.com/insilica/rs-srvc/master/src/schema/label-answer/boolean-v1.json
-    question: Eye irritation?
-  group_label:
-    type: object
-    json_schema:
-      $schema: http://json-schema.org/draft-07/schema
-      type: array
-      items:
-        type: object
-        properties:
-          acute_tox:
-            type: boolean
-          eye_irrit:
-            type: boolean
-          substances:
-            type: array
-            items:
-              type: string
-              enum:
-                - sodium laureth sulfate
-                - sodium lauryl sulfoacetate
-                - sodium cocoyl glycinate
-                - disodium cocoyl glutamate
-                - decyl glucoside
-                - lauryl glucoside
-    question: Group Label
+    question: Annotation  
+
   substances:
-    type: strings
-    json_schema:
-      $schema: http://json-schema.org/draft-07/schema
-      type: array
-      items:
-        type: string
-        enum:
-          - sodium laureth sulfate
-          - sodium lauryl sulfoacetate
-          - sodium cocoyl glycinate
-          - disodium cocoyl glutamate
-          - decyl glucoside
-          - lauryl glucoside
-    question: Substance(s)
+    question: Category
+    type: categorical
+    categories:
+      - sodium laureth sulfate
+      - sodium lauryl sulfoacetate
+      - sodium cocoyl glycinate
+      - disodium cocoyl glutamate
+      - decyl glucoside
+      - lauryl glucoside
+
+  include:
+    question: Include?
+    required: true
+    type: boolean
 
 flows:
 
@@ -62,29 +31,15 @@ flows:
       - run_embedded: "remove-reviewed"
       - run_embedded: "label"
         labels:
-          - substances
           - acute_tox
-          - eye_irrit
 
-  group_label:
+  label:
     steps:
       - run_embedded: "generator-file data/docs.jsonl"
       - run_embedded: "remove-reviewed"
-      - run_embedded: "html src/resources/public/label.html"
-        port: 5003
-        labels:
-          - group_label
-
-  html_label:
-    steps:
-      - run_embedded: "generator-file data/docs.jsonl"
-      - run_embedded: "remove-reviewed"
-      - run_embedded: "html src/resources/public/label.html"
+      - run_embedded: "label-web"
         port: 5000
-        labels:
-          - substances
-          - acute_tox
-          - eye_irrit
+        labels: [include, substances]
 
   annotate:
     steps:
@@ -92,16 +47,6 @@ flows:
       - run_embedded: "remove-reviewed"
       - run_embedded: "html src/resources/public/recogito.html"
         port: 5001
-        labels: [annotation]
-
-  spacy:
-    steps:
-      - run_embedded: "generator-file data/docs.jsonl"
-      - run: "src/spacy-ner.py"
-        labels: [annotation]
-        model: "https://s3.amazonaws.com/ins.pins/spacy.zip"
-      - run_embedded: "html src/resources/public/recogito.html"
-        port: 5002
         labels: [annotation]
 
   spacy-flake:
