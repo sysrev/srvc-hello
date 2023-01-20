@@ -8,7 +8,7 @@ pacman::p_load(tidyverse, jsonlite)
 
 jsonlines <- readr::read_lines("sink.jsonl") |> map(jsonlite::fromJSON)
 jtbl <- tibble(lines=jsonlines) |> unnest_wider(lines)
-jtbl |> select(hash,type,uri,data,uri)
+jtbl |> select(hash,type,data)
 ```
 
 1. **hash**: a content-hash derived from the `data` object
