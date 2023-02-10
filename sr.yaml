@@ -25,14 +25,6 @@ labels:
 
 flows:
 
-  simple:
-    steps:
-      - run-embedded: "generator-file data/docs.jsonl"
-      - run-embedded: "remove-reviewed"
-      - run-embedded: "label"
-        labels:
-          - acute_tox
-
   label:
     steps:
       - run-embedded: "generator-file data/docs.jsonl"
