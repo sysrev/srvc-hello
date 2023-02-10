@@ -177,15 +177,16 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1671231581,
-        "narHash": "sha256-hWL9OqiDUqmZL9X3IZu8f8a8zaze6UaSuwRB+5w9Ejk=",
+        "lastModified": 1674604436,
+        "narHash": "sha256-m4mN+vDEKPHRavtI9CbszOOdJcLYa+XqlzEyPvPXE0g=",
         "owner": "insilica",
         "repo": "rs-srvc",
-        "rev": "d0df1893b1a97f4bb919699f8e957ba4753bfa64",
+        "rev": "f7cb36730eb2c344b0eeda18dcc572bc72d64e1a",
         "type": "github"
       },
       "original": {
         "owner": "insilica",
+        "ref": "v0.13.0",
         "repo": "rs-srvc",
         "type": "github"
       }

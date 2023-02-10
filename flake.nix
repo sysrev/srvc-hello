@@ -19,7 +19,7 @@
       inputs.flake-utils.follows = "flake-utils";
       inputs.pypi-deps-db.follows = "pypi-deps-db";
     };
-    srvc.url = "github:insilica/rs-srvc";
+    srvc.url = "github:insilica/rs-srvc/v0.13.0";
   };
   outputs = { self, nixpkgs, flake-utils, mach-nix, srvc, ... }@inputs:
     flake-utils.lib.eachDefaultSystem (system:
