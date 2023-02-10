@@ -5,7 +5,7 @@ reviewer: mailto:user@example.com
 labels:
   annotation:
     type: webannotation
-    question: Annotation  
+    question: Annotation
 
   substances:
     question: Category
@@ -27,34 +27,34 @@ flows:
 
   simple:
     steps:
-      - run_embedded: "generator-file data/docs.jsonl"
-      - run_embedded: "remove-reviewed"
-      - run_embedded: "label"
+      - run-embedded: "generator-file data/docs.jsonl"
+      - run-embedded: "remove-reviewed"
+      - run-embedded: "label"
         labels:
           - acute_tox
 
   label:
     steps:
-      - run_embedded: "generator-file data/docs.jsonl"
-      - run_embedded: "remove-reviewed"
-      - run_embedded: "label-web"
+      - run-embedded: "generator-file data/docs.jsonl"
+      - run-embedded: "remove-reviewed"
+      - run-embedded: "label-web"
         port: 5000
         labels: [include, substances]
 
   annotate:
     steps:
-      - run_embedded: "generator-file data/docs.jsonl"
-      - run_embedded: "remove-reviewed"
-      - run_embedded: "html src/resources/public/recogito.html"
+      - run-embedded: "generator-file data/docs.jsonl"
+      - run-embedded: "remove-reviewed"
+      - run-embedded: "html src/resources/public/recogito.html"
         port: 5001
         labels: [annotation]
 
   spacy-flake:
     steps:
-      - run_embedded: "generator-file data/docs.jsonl"
+      - run-embedded: "generator-file data/docs.jsonl"
       - uses: github:sysrev/srvc-hello#spacy
         labels: [annotation]
         model: "https://s3.amazonaws.com/ins.pins/spacy.zip"
-      - run_embedded: "html src/resources/public/recogito.html"
+      - run-embedded: "html src/resources/public/recogito.html"
         port: 5002
         labels: [annotation]
