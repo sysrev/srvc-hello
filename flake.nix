@@ -4,6 +4,10 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-22.05";
     flake-utils.url = "github:numtide/flake-utils";
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
     pypi-deps-db = {
       url = "github:DavHau/pypi-deps-db";
       inputs.nixpkgs.follows = "nixpkgs";
